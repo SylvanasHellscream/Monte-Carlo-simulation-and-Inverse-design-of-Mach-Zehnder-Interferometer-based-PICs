@@ -1,0 +1,3 @@
+select('CWL_1');
+data = get("power");
+set('power', 1e-3);

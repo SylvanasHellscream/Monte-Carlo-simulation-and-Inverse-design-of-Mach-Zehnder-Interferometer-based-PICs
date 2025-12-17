@@ -1,0 +1,98 @@
+#ConnectElement1="c_"+1+"_"+1;
+#name=num2str(12);
+
+ #Ncolumn=8;# defined in python API
+ #Nrow=8;#defined in python API
+TempXPosi=0;
+TempYPosi=0;
+for(i=1:Ncolumn/2){
+    for(j=1:Nrow-1){
+        addelement("Waveguide Coupler");
+        ElementName="C_"+num2str(i)+"_"+num2str(j);
+        set("name",ElementName);
+        set("x position",TempXPosi);
+        set("y position",TempYPosi);
+        
+        #-----------------------------
+        #Connect within colomn
+        if(j!=1){
+            ConnectionName="C_"+num2str(i)+"_"+num2str(j-1);
+            if(mod(j,2)==0){
+                connect(ElementName,"port 1",ConnectionName,"port 4");
+            }
+            if(mod(j,2)!=0){
+                connect(ElementName,"port 3",ConnectionName,"port 2");
+            }
+        }
+        #--------------------------------
+        #Connect the top edge      
+        if(j==1&i!=1){
+            ConnectionName="C_"+num2str(i-1)+"_2";
+            connect(ElementName,"port 2",ConnectionName,"port 3");
+            ConnectionName="C_"+num2str(i-1)+"_1";
+            connect(ElementName,"port 1",ConnectionName,"port 3");
+        }
+        #--------------------------------
+        #Connect the bottom edge
+        if(j==Nrow-1&i!=1){
+            ConnectionName="C_"+num2str(i-1)+"_"+num2str(j-1);
+            connect(ElementName,"port 1",ConnectionName,"port 4");
+            ConnectionName="C_"+num2str(i-1)+"_"+num2str(j);
+            connect(ElementName,"port 2",ConnectionName,"port 4");
+        }
+        #--------------------------------
+        #Connect between colomn
+        if(i!=1&j!=1&j!=Nrow-1&mod(j,2)!=0){
+            ConnectionName="C_"+num2str(i-1)+"_"+num2str(j-1);
+            connect(ElementName,"port 1",ConnectionName,"port 4");
+            ConnectionName="C_"+num2str(i-1)+"_"+num2str(j+1);
+            connect(ElementName,"port 2",ConnectionName,"port 3");
+        }
+        #---------------------------------
+        #Create CW laser and connect
+        if(i==1&mod(j,2)!=0){
+            addelement("CW Laser");
+            ConnectionName="CWL_"+num2str(j);
+            set("name",ConnectionName);
+            set("x position",TempXPosi-300);
+            set("y position",TempYPosi-100);
+            connect(ElementName,"port 1",ConnectionName,"output");
+            addelement("CW Laser");
+            ConnectionName="CWL_"+num2str(j+1);
+            set("name",ConnectionName);
+            set("x position",TempXPosi-300);
+            set("y position",TempYPosi+100);
+            connect(ElementName,"port 2",ConnectionName,"output");
+        }
+        
+        #---------------------------------
+        #Create power meter and connect
+        if(i==Ncolumn/2){
+            if (j==1){
+                addelement("Optical Power Meter");
+                set("x position",TempXPosi+600);
+                set("y position",TempYPosi-100);
+                connect("OPWM_"+num2str(j),"input",ElementName,"port 3");
+            }else if(j==Nrow-1){
+                addelement("Optical Power Meter");
+                set("x position",TempXPosi+600);
+                set("y position",TempYPosi+100);
+                connect("OPWM_"+num2str(j+1),"input",ElementName,"port 4");
+            }else if(mod(j,2)==0){
+                addelement("Optical Power Meter");
+                set("x position",TempXPosi+300);
+                set("y position",TempYPosi-100);
+                addelement("Optical Power Meter");
+                set("x position",TempXPosi+300);
+                set("y position",TempYPosi+100);
+                connect("OPWM_"+num2str(j),"input",ElementName,"port 3");
+                connect("OPWM_"+num2str(j+1),"input",ElementName,"port 4");
+            }
+        }
+        TempXPosi=TempXPosi+300*(-1)^(j-1);
+        TempYPosi=TempYPosi+200;
+        
+    }
+    TempXPosi=TempXPosi+300;
+    TempYPosi=TempYPosi-(Nrow-1)*200;
+}
