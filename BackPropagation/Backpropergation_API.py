@@ -1,9 +1,20 @@
 import numpy as np
-import lumapi
+#import lumapi
 import matplotlib.pyplot as plt
 #import pandas  as pd
 #from lumopt.optimizers.generic_optimizers import ScipyOptimizers
 #from scipy.optimize import minimize
+
+import importlib.util
+
+#Change the version name or path if this path is not correct: C:\\Program Files\\Lumerical\\v242\\api\\python\\lumapi.py
+spec_win = importlib.util.spec_from_file_location('lumapi', 'C:\\Program Files\\Lumerical\\v232\\api\\python\\lumapi.py')
+
+#Functions that perform the actual loading
+lumapi = importlib.util.module_from_spec(spec_win) #windows
+spec_win.loader.exec_module(lumapi)
+print("Lumerical interface import done!")
+print("You may get a warning, it is fine.")
 
 
 It=lumapi.INTERCONNECT("BackPropergation.icp")
@@ -112,3 +123,4 @@ ga_instance.run()
 solution, solution_fitness, solution_idx = ga_instance.best_solution()
 print(f"Best Solution: {solution}")
 print(f"Best Solution Fitness: {-solution_fitness}") '''
+
